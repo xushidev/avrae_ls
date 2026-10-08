@@ -30,7 +30,7 @@ pub fn decode(msg: &str) -> (String, usize) {
 
     // turn the string into BaseMessage object
     let base_message: BaseMessage = serde_json::from_str(&content[..content_length]).unwrap();
-    
+
     // Logging
     info!("{}", serde_json::to_string(&base_message).unwrap());
     return (base_message.method, content_length);

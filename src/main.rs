@@ -2,6 +2,11 @@
 use std::io;
 use std::io::prelude::*;
 
+// environment variables and path
+use std::env;
+use std::path::Path;
+
+use log::info;
 use serde_json::json;
 use simplelog::{CombinedLogger, Config, LevelFilter, WriteLogger};
 use std::fs::File;
@@ -15,7 +20,7 @@ fn main() -> io::Result<()> {
     CombinedLogger::init(vec![WriteLogger::new(
         LevelFilter::Info,
         Config::default(),
-        File::create("avrae_ls.log").unwrap(),
+        File::create(format!("{}/{}", env::home_dir().unwrap().display(), "avrae_ls.log")).unwrap(),
     )])
     .unwrap();
 
@@ -38,6 +43,5 @@ fn main() -> io::Result<()> {
     // debug out
     // io::stdout().write(content.as_bytes())?;
     let (method, length) = rpc::decode(&content);
-
     return Ok(());
 }
