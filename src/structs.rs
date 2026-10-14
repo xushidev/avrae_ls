@@ -11,23 +11,23 @@ trait Message {
 // RequestMessage extends Message
 #[derive(Deserialize, Serialize, Debug)]
 pub struct RequestMessage {
-    id: serde_json::Value,
-    method: String,
-    params: Option<serde_json::Value>,
+    pub id: serde_json::Value,
+    pub method: String,
+    pub params: Option<serde_json::Value>,
 }
 impl Message for RequestMessage {}
 
 // ResponseMessage extends Message
 #[derive(Deserialize, Serialize, Debug)]
-struct ResponseMessage {
-    id: Option<serde_json::Value>,
-    result: Option<serde_json::Value>,
-    error: Option<serde_json::Value>, // Let's just use Value for Response Error
+pub struct ResponseMessage {
+    pub id: Option<serde_json::Value>,
+    pub result: Option<serde_json::Value>,
+    pub error: Option<serde_json::Value>, // Let's just use Value for Response Error
 }
 impl Message for ResponseMessage {}
 
-// base message has method parameter
-#[derive(Deserialize, Serialize)]
-pub struct BaseMessage {
-    pub method: String,
+#[derive(Deserialize, Serialize, Debug)]
+pub struct InitializeResult {
+    pub capabilities: serde_json::Value,
+    pub serverInfo: Option<serde_json::Value>,
 }
