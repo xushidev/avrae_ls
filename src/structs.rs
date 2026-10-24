@@ -23,6 +23,7 @@ pub struct ResponseMessage {
     pub jsonrpc: String,
     pub id: Option<serde_json::Value>,
     pub result: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<serde_json::Value>, // Let's just use Value for Response Error
 }
 

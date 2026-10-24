@@ -6,7 +6,7 @@ use std::io::prelude::*;
 use std::env;
 
 use log::{error, info};
-use serde_json::{Result, Value::Null, json};
+use serde_json::{Result, json};
 use simplelog::{CombinedLogger, Config, LevelFilter, WriteLogger};
 use std::fs::File;
 
@@ -94,7 +94,7 @@ fn handle_messages(msg: RequestMessage) {
             jsonrpc: "2.0".to_string(),
             id: msg.id,
             result: Some(serde_json::value::to_value(initialize_params).unwrap()),
-            error: Some(Null),
+            error: None,
         };
 
         stdout
