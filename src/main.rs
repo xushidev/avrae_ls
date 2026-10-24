@@ -5,8 +5,8 @@ use std::io::prelude::*;
 // environment variables and path
 use std::env;
 
-use log::{error, info};
-use serde_json::{Result, json};
+use log::info;
+use serde_json::json;
 use simplelog::{CombinedLogger, Config, LevelFilter, WriteLogger};
 use std::fs::File;
 
@@ -22,7 +22,7 @@ fn main() -> io::Result<()> {
         LevelFilter::Info,
         Config::default(),
         File::create(format!(
-            "{}/{}",
+            "{}/.local/state/nvim/{}",
             env::home_dir().unwrap().display(),
             "avrae_ls.log"
         ))
@@ -69,10 +69,6 @@ fn main() -> io::Result<()> {
 
         // Deserialize the body into an actual request message
         let request_message: RequestMessage = serde_json::from_str(&body).unwrap();
-        info!(
-            "Received a request message with method: {} and id: {:?}",
-            request_message.method, request_message.id
-        );
         handle_messages(request_message);
     }
 
@@ -81,51 +77,36 @@ fn main() -> io::Result<()> {
 
 fn handle_messages(msg: RequestMessage) {
     let mut stdout = io::stdout().lock();
-    if msg.method == "initialize" {
-        // Building inizialize response message
-        let initialize_params: InitializeResult = InitializeResult {
-            // server capabilities:
-            capabilities: json!({"hoverProvider": true}),
-            // server info defined as {name: string, version?: string}
-            serverInfo: json!({"name": "avrae_ls", "version": "1.0"}).into(),
-        };
+    match msg.method.as_str() {
+        "initialize" => {
+            // Building inizialize response message
+            let initialize_params: InitializeResult = InitializeResult {
+                // server capabilities:
+                capabilities: json!({"hoverProvider": true}),
+                // server info defined as {name: string, version?: string}
+                serverInfo: json!({"name": "avrae_ls", "version": "1.0"}).into(),
+            };
 
-        let response_message: ResponseMessage = ResponseMessage {
-            jsonrpc: "2.0".to_string(),
-            id: msg.id,
-            result: Some(serde_json::value::to_value(initialize_params).unwrap()),
-            error: None,
-        };
+            let response_message: ResponseMessage = ResponseMessage {
+                jsonrpc: "2.0".to_string(),
+                id: msg.id,
+                result: Some(serde_json::value::to_value(initialize_params).unwrap()),
+                error: None,
+            };
 
-        stdout
-            .write_all(rpc::encode(&serde_json::to_string(&response_message).unwrap()).as_bytes())
-            .unwrap();
-        stdout.flush().unwrap();
+            stdout
+                .write_all(
+                    rpc::encode(&serde_json::to_string(&response_message).unwrap()).as_bytes(),
+                )
+                .unwrap();
+            stdout.flush().unwrap();
+        }
+        "initialized" => {
+            info!("Server initialized successfully");
+        }
+        _ => {
+            // If it doesn't matches anything, simply log it
+            info!("Got a {} method, which is not implemented", msg.method);
+        }
     }
 }
-
-/*
-        info!("Loop count: {}", loop_count);
-        // get all the daout
-        let mut buffer = String::new();
-        stdin.read_to_string(&mut buffer).unwrap();
-
-        info!("Read from standard input: {}", buffer);
-
-        // pass all the data to the decoder
-        let request_message = rpc::decode(&buffer);
-
-        // Logging the method and id
-        info!(
-            "Received message with method: {} and id: {:?}",
-            request_message.method, request_message.id
-        );
-        match handle_messages(request_message) {
-            Err(error) => {
-                error!("Received error: {}", error);
-                break;
-            }
-            Ok(value) => info!("Successfully handled the message"),
-        };
-        loop_count = loop_count + 1;
-*/
