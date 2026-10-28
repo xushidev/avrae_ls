@@ -29,7 +29,6 @@ fn main() -> io::Result<()> {
         .unwrap(),
     )])
     .unwrap();
-    info!("Successfully inizialised logger.");
 
     // Begin the message handling
     let stdin = io::stdin();
@@ -38,8 +37,6 @@ fn main() -> io::Result<()> {
         let mut handle = stdin.lock();
         let mut buffer = vec![];
         let bytes_read = handle.read_until(b'\n', &mut buffer).unwrap();
-
-        info!("Read something");
 
         if bytes_read == 0 {
             // if zero bytes are read, then that means we have reached EOF and
@@ -82,7 +79,9 @@ fn handle_messages(msg: RequestMessage) {
             // Building inizialize response message
             let initialize_params: InitializeResult = InitializeResult {
                 // server capabilities:
-                capabilities: json!({"hoverProvider": true}),
+                capabilities: json!({
+                    "hoverProvider": true
+                }),
                 // server info defined as {name: string, version?: string}
                 serverInfo: json!({"name": "avrae_ls", "version": "1.0"}).into(),
             };
@@ -100,9 +99,13 @@ fn handle_messages(msg: RequestMessage) {
                 )
                 .unwrap();
             stdout.flush().unwrap();
-        }
+        },
         "initialized" => {
             info!("Server initialized successfully");
+        },
+        "shutdown" => {
+            info!("Server shutdown");
+            std::process::exit(0);
         }
         _ => {
             // If it doesn't matches anything, simply log it
