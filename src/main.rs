@@ -80,7 +80,9 @@ fn handle_messages(msg: RequestMessage) {
             let initialize_params: InitializeResult = InitializeResult {
                 // server capabilities:
                 capabilities: json!({
-                    "hoverProvider": true
+                    "hoverProvider": true,
+                    "textDocumentSync": 1,
+                    "definitionProvider": true
                 }),
                 // server info defined as {name: string, version?: string}
                 serverInfo: json!({"name": "avrae_ls", "version": "1.0"}).into(),
@@ -99,13 +101,32 @@ fn handle_messages(msg: RequestMessage) {
                 )
                 .unwrap();
             stdout.flush().unwrap();
-        },
+        }
         "initialized" => {
             info!("Server initialized successfully");
-        },
+        }
         "shutdown" => {
             info!("Server shutdown");
             std::process::exit(0);
+        }
+        "textDocument/hover" => {
+            info!("Hover request received!");
+
+            let response_message: ResponseMessage = ResponseMessage {
+                jsonrpc: "2.0".to_string(),
+                id: msg.id,
+                result: Some(json!({
+                    "contents": "Hello from Language Server!",
+                })),
+                error: None,
+            };
+
+            stdout
+                .write_all(
+                    rpc::encode(&serde_json::to_string(&response_message).unwrap()).as_bytes(),
+                )
+                .unwrap();
+            stdout.flush().unwrap();
         }
         _ => {
             // If it doesn't matches anything, simply log it
